@@ -2,7 +2,6 @@ package factory
 
 import (
 	"fmt"
-
 )
 
 func GetGun(gunType string) (IGun, error) {
