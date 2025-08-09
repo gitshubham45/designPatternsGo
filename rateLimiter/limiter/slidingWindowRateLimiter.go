@@ -26,7 +26,7 @@ func (rl *SlidingWindowRateLimiter) Allow(key string) bool {
 	defer rl.mu.Unlock()
 
 	now := time.Now()
-	windowStart := now.Add(-rl.window) // eg. taking last 10 second
+	windowStart := now.Add(-rl.window) // eg. taking last 10 second(finding start time)
 
 	// filter out timestamp outside the window
 	reqs := rl.requests[key]
