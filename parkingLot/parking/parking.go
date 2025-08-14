@@ -1,6 +1,9 @@
 package parking
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type Parking struct {
 	Name    string
@@ -9,27 +12,29 @@ type Parking struct {
 }
 
 func (p *Parking) Park(registrationNumber string) (int , bool) {
-	var parkingSlot int
-	for i, vehicle := range p.Space {
-		if vehicle.ParkingSlot == 0 {
-			vehicle.ParkingSlot = i + 1
-			vehicle.RegistrationNumber = registrationNumber
-			parkingSlot = i
+	fmt.Println(p.Space)
+	for i := range p.Space {
+		if p.Space[i].RegistrationNumber == "" {
+			p.Space[i].ParkingNumber = i + 1
+			p.Space[i].RegistrationNumber = registrationNumber
+			return p.Space[i].ParkingNumber, true
 		}
 	}
-	return parkingSlot , true
+	return 0, false
 }
 
-func (p *Parking) Unpark(parkingSlot int, registrationNumber string) bool {
-	vehicle := p.Space[parkingSlot]
+func (p *Parking) Unpark(parkingNumber int, registrationNumber string) bool {
+	index := parkingNumber - 1
+	if index < 0 || index >= len(p.Space) {
+		return false
+	}
 
-	if vehicle.RegistrationNumber == registrationNumber {
-		vehicle.ParkingSlot = 0
-		vehicle.RegistrationNumber = ""
+	if p.Space[index].RegistrationNumber == registrationNumber {
+		p.Space[index].ParkingNumber = 0
+		p.Space[index].RegistrationNumber = ""
 		return true
 	}
 	return false
-
 }
 
 var (
