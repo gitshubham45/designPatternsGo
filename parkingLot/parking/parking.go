@@ -1,54 +1,32 @@
 package parking
 
-import (
-	"fmt"
-	"sync"
-)
-
-type Parking struct {
-	Name    string
-	Capcity int
-	Space   []Vehicle
+type ParkingSlot struct {
+	ID      int
+	Vehicle *Vehicle
 }
 
-func (p *Parking) Park(registrationNumber string) (int , bool) {
-	fmt.Println(p.Space)
-	for i := range p.Space {
-		if p.Space[i].RegistrationNumber == "" {
-			p.Space[i].ParkingNumber = i + 1
-			p.Space[i].RegistrationNumber = registrationNumber
-			return p.Space[i].ParkingNumber, true
+func (p *ParkingLot) Park(registrationNumber string,vt VehicleType) (int, bool) {
+	for i := range p.Slots {
+		if p.Slots[i] == nil {
+			p.Slots[i].ID = i + 1
+			p.Slots[i].Vehicle.RegistrationNumber = registrationNumber
+			p.Slots[i].Vehicle.Type = vt
+			return i + 1, true
 		}
 	}
 	return 0, false
 }
 
-func (p *Parking) Unpark(parkingNumber int, registrationNumber string) bool {
+func (p *ParkingLot) Unpark(parkingNumber int, registrationNumber string) bool {
 	index := parkingNumber - 1
-	if index < 0 || index >= len(p.Space) {
+	if index < 0 || index >= len(p.Slots) {
 		return false
 	}
 
-	if p.Space[index].RegistrationNumber == registrationNumber {
-		p.Space[index].ParkingNumber = 0
-		p.Space[index].RegistrationNumber = ""
+	if p.Slots[index].Vehicle.RegistrationNumber == registrationNumber {
+		p.Slots[index].ID = 0
+		p.Slots[index].Vehicle.RegistrationNumber = ""
 		return true
 	}
 	return false
-}
-
-var (
-	parkingInstance *Parking
-	once            sync.Once
-)
-
-func NewParking(capacity int, name string) *Parking {
-	once.Do(func() {
-		parkingInstance = &Parking{
-			Name:    name,
-			Capcity: capacity,
-			Space:   make([]Vehicle, capacity),
-		}
-	})
-	return parkingInstance
 }
