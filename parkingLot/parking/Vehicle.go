@@ -13,3 +13,5 @@ type Vehicle struct {
 	RegistrationNumber string
 	Type VehicleType
 }
+
+

@@ -6,15 +6,16 @@ import (
 )
 
 type Parking interface {
-	Park(string) (int, bool)
+	Park(string) (*Ticket, bool)
 	Unpark(int, string) bool
+	CalculteBill() float64
 }
 
 type RateCard map[VehicleType]float64
 
 type Ticket struct {
 	SlotID    int
-	Vehicle   Vehicle
+	Vehicle   *Vehicle
 	EntryTime time.Time
 }
 
@@ -22,13 +23,13 @@ type ParkingLot struct {
 	Name     string
 	Capacity int
 	Slots    []*ParkingSlot
-	Tickets  map[string]Ticket
+	Tickets  map[int]Ticket
 	Rates    RateCard
 }
 
 var (
 	parkingLotInstance *ParkingLot
-	once            sync.Once
+	once               sync.Once
 )
 
 func NewParkingLot(capacity int, name string) *ParkingLot {
@@ -37,13 +38,15 @@ func NewParkingLot(capacity int, name string) *ParkingLot {
 			Name:     name,
 			Capacity: capacity,
 			Slots:    make([]*ParkingSlot, capacity),
-			Tickets:  make(map[string]Ticket),
+			Tickets:  make(map[int]Ticket),
 			Rates: RateCard{
 				Car:   20.0,
 				Bike:  10.0,
+				Bus:   40.0,
 				Truck: 50.0,
 			},
 		}
 	})
 	return parkingLotInstance
 }
+
