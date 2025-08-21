@@ -2,7 +2,6 @@ package store
 
 import (
 	"sync"
-	"time"
 )
 
 type Store interface {
@@ -16,7 +15,7 @@ type KeyValStore struct {
 	Map map[string]interface{}
 }
 
-func (kvs *KeyValStore) SET(key string, val interface{},time time.Duration) bool {
+func (kvs *KeyValStore) SET(key string, val interface{}, time *string) bool {
 	kvs.mu.Lock()
 	defer kvs.mu.Unlock()
 	kvs.Map[key] = val
@@ -32,7 +31,10 @@ func (kvs *KeyValStore) GET(key string) interface{} {
 func (kvs *KeyValStore) DEL(key string) bool {
 	kvs.mu.Lock()
 	defer kvs.mu.Unlock()
-	delete(kvs.Map, key)
+	if _ , ok := kvs.Map[key]; ok {
+		delete(kvs.Map, key)
+		return true
+    }
 	return true
 }
 
@@ -42,9 +44,9 @@ var (
 )
 
 func NewKeyValueStore() *KeyValStore {
-	once.Do(func(){
+	once.Do(func() {
 		keyValStoreInstance = &KeyValStore{
-			Map : make(map[string]interface{}),
+			Map: make(map[string]interface{}),
 		}
 	})
 	return keyValStoreInstance
