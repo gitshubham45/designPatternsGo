@@ -28,17 +28,17 @@ func (rl *SlidingWindowRateLimiter) Allow(key string) bool {
 	now := time.Now()
 	windowStart := now.Add(-rl.window) // eg. taking last 10 second(finding start time)
 
-	// filter out timestamp outside the window
+	// filter out timestamp after start( within window)
 	reqs := rl.requests[key]
 	var filtered []time.Time
-	for _ , t := range reqs {
-		if t.After(windowStart){
+	for _, t := range reqs {
+		if t.After(windowStart) {
 			filtered = append(filtered, t)
 		}
 	}
 
 	// check if within limit
-	if len(filtered) >= rl.limit{
+	if len(filtered) >= rl.limit {
 		return false
 	}
 

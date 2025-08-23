@@ -14,10 +14,7 @@ type RateLimiter interface {
 func main() {
 	rl := limiter.NewSlidingWindowRateLimiter(5, 10*time.Second)
 
-	frl := limiter.NewFixedWindowRateLimiter(10,10*time.Second)
-
-	
-
+	frl := limiter.NewFixedWindowRateLimiter(10, 10*time.Second)
 
 	key := "user1"
 	for i := 0; i < 30; i++ {

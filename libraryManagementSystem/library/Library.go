@@ -58,7 +58,11 @@ func (lib *LibraryInstance) AddBookToLibrary(book *Book) bool {
 
 // for noe I am taking ISBN but we can have option for ID as well
 func (lib *LibraryInstance) FullFillRequest(bookID string, userID string, requestType RequestType) bool {
-	if _, ok := lib.Books[bookID]; ok {
+	if book, ok := lib.Books[bookID]; ok {
+		if book.Count == 0 {
+			fmt.Printf("Book %s is not available", bookID)
+			return false
+		}
 		request := &UserRequest{
 			ID:          uuid.New().String(),
 			UserID:      userID,
@@ -66,11 +70,16 @@ func (lib *LibraryInstance) FullFillRequest(bookID string, userID string, reques
 			Time:        time.Now(),
 			RequestType: requestType,
 		}
+		if requestType == Borrow {
+			book.Count -= 1
+		}else if requestType == Return{
+			book.Count += 1
+		}
 		lib.Requests = append(lib.Requests, request)
 		lib.Users[userID].Requests = append(lib.Users[userID].Requests, request)
 		return true
 	}
-	return true
+	return false
 }
 
 var (
