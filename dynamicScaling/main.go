@@ -19,9 +19,9 @@ type WorkerPool struct {
 	scaleTicker *time.Ticker
 }
 
-func NewWorkerPool(min, max int) *NewWorkerPool {
+func NewWorkerPool(min, max int) *WorkerPool {
 	ctx, cancel := context.WithCancel(context.Background())
-	return &NewWorkerPool{
+	return &WorkerPool{
 		tasks:       make(chan int, 20),
 		ctx:         ctx,
 		cancel:      cancel,
@@ -44,7 +44,7 @@ func (wp *WorkerPool) worker(id int) {
 				fmt.Printf("Worker %d finished all tasks\n", id)
 				return
 			}
-			fmt.Println("Worker %d processing task %d \n", id, task)
+			fmt.Printf("Worker %d processing task %d \n", id, task)
 			time.Sleep(500 * time.Millisecond) // simultate work
 		}
 	}
@@ -67,11 +67,59 @@ func (wp *WorkerPool) addWorker() {
 		wp.numWorkers++
 		id := wp.numWorkers
 		wp.wg.Add(1)
-		go wp.
+		go wp.worker(id)
+		fmt.Printf("worker %d started (total: %d) \n", id, wp.numWorkers)
 	}
+}
+
+func (wp *WorkerPool) removeWorker() {
+	wp.mu.Lock()
+	defer wp.mu.Unlock()
+	if wp.numWorkers > wp.maxWorkers {
+		wp.numWorkers--
+		fmt.Printf("Scaling down - Remaining workers - %d \n", wp.numWorkers)
+	}
+}
+
+func (wp *WorkerPool) autoScaler() {
+	for {
+		select {
+		case <-wp.ctx.Done():
+			return
+		case <-wp.scaleTicker.C:
+			queueLen := len(wp.tasks)
+
+			if queueLen > wp.numWorkers && wp.numWorkers < wp.maxWorkers {
+				wp.addWorker()
+			} else if queueLen == 0 && wp.numWorkers > wp.maxWorkers {
+				wp.removeWorker()
+			}
+		}
+	}
+}
+
+func (wp *WorkerPool) submit(task int) {
+	wp.tasks <- task
+}
+
+func (wp *WorkerPool) ShutDown() {
+	fmt.Println("Shutting doen initiated...")
+	wp.cancel()
+	close(wp.tasks)
+	wp.scaleTicker.Stop()
+	wp.wg.Wait()
+	fmt.Println("All workers stopped cleanly")
 }
 
 func main() {
 	wp := NewWorkerPool(2, 6)
+	wp.Start()
 
+	for i := 1; i <= 20; i++ {
+		wp.submit(i)
+	}
+
+	time.Sleep(10 * time.Second)
+
+	wp.ShutDown()
 }
