@@ -47,24 +47,31 @@ func ParseExpenseCommand(parts []string) (*Expense, error) {
 
 	splitType := strings.ToUpper(parts[4+numUsers])
 
-	// values (optional) depending on the split type
-	values := []float64{}
+	inputValues := []float64{}
 	if splitType == "EXACT" || splitType == "PERCENT" {
 		for _, v := range parts[5+numUsers:] {
 			f, err := strconv.ParseFloat(v, 64)
 			if err != nil {
 				return nil, fmt.Errorf("invlaid value: %s", v)
 			}
-			if splitType == "EXACT" {
-				values = append(values, f)
-			} else {
-				values = append(values, amount*f/100)
-			}
+			inputValues = append(inputValues, f)
 		}
-	} else if splitType == "EQUAL" {
-		for i := 0; i < numUsers; i++ {
-			values = append(values, amount/float64(numUsers))
-		}
+	}
+
+	if len(inputValues) == 0 {
+		inputValues = make([]float64, numUsers)
+	}
+
+	// values (optional) depending on the split type
+	splitStrategy, err := GetSplitStategy(splitType)
+	if err != nil {
+		return nil, err
+	}
+
+	values, err := splitStrategy.Split(amount, numUsers, inputValues)
+
+	if err != nil {
+		return nil, err
 	}
 
 	expense := &Expense{

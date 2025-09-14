@@ -88,27 +88,5 @@ func (s *SplitGroup) AddExpense(expense *Expense) {
 			// no reverse entry, simply add to A-B
 			s.ExpenseMap[A_paid_for_B_payment_mapping_string] += amountPaid
 		}
-
-		// if s.ExpenseMap[B_paid_for_A_payment_mapping_string] == 0 {
-		// 	s.ExpenseMap[A_paid_for_B_payment_mapping_string] += amountPaid
-		// } else {
-
-		// 	s.ExpenseMap[A_paid_for_B_payment_mapping_string] = max(0, amountPaid-s.ExpenseMap[B_paid_for_A_payment_mapping_string])
-		// 	s.ExpenseMap[B_paid_for_A_payment_mapping_string] = max(0, s.ExpenseMap[B_paid_for_A_payment_mapping_string]-amountPaid)
-
-		// 	if u.UserName == "abhishek" || u.UserName == "rahul" {
-		// 		// fmt.Println("Amount : ", amountPaid)
-		// 		fmt.Printf("%s : % f", A_paid_for_B_payment_mapping_string, s.ExpenseMap[A_paid_for_B_payment_mapping_string])
-		// 		fmt.Printf("%s : %f", B_paid_for_A_payment_mapping_string, s.ExpenseMap[B_paid_for_A_payment_mapping_string])
-		// 	}
-		// }
 	}
-
 }
-
-//  EXPENSE Abhishek 4 Abhishek Rahul Shyam Alok EQUAL 1000
-
-// EXPENSE Abhishek 4 Abhishek Rahul Shyam Alok EQUAL 1000
-// Parsed Expende &{ID:4606f6a1-874d-45c6-a1d8-d8d6ab0b9440 Amount:1000 PaidBy:Abhishek Split:EQUAL Values:[] Users:[Abhishek Rahul Shyam Alok]}
-// >
-// SHOW
