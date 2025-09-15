@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"fmt"
+	"sync"
 )
 
 type SplitGroup struct {
@@ -10,33 +11,35 @@ type SplitGroup struct {
 	Expenses   []*Expense
 	ExpenseMap map[string]float64
 	TotalUsers int
+	mu         sync.Mutex
 }
 
 func (s *SplitGroup) ShowOne(currentUserName string) {
-    fmt.Printf("Showing for user %s\n", currentUserName)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	fmt.Printf("Showing for user %s\n", currentUserName)
 
-    for _, u := range s.Users {
-        if currentUserName == u.UserName {
-            continue
-        }
+	for _, u := range s.Users {
+		if currentUserName == u.UserName {
+			continue
+		}
 
-        A_paid_for_B := fmt.Sprintf("%s-%s", currentUserName, u.UserName)
-        B_paid_for_A := fmt.Sprintf("%s-%s", u.UserName, currentUserName)
+		A_paid_for_B := fmt.Sprintf("%s-%s", currentUserName, u.UserName)
+		B_paid_for_A := fmt.Sprintf("%s-%s", u.UserName, currentUserName)
 
-        amountAB := s.ExpenseMap[A_paid_for_B]
-        amountBA := s.ExpenseMap[B_paid_for_A]
+		amountAB := s.ExpenseMap[A_paid_for_B]
+		amountBA := s.ExpenseMap[B_paid_for_A]
 
-        // Ideally, only one of these should be > 0
-        if amountAB > 0 {
-            fmt.Printf("%s owes %s : %.2f\n", u.UserName, currentUserName, amountAB)
-        } else if amountBA > 0 {
-            fmt.Printf("%s owes %s : %.2f\n", currentUserName, u.UserName, amountBA)
-        }
-    }
+		// Ideally, only one of these should be > 0
+		if amountAB > 0 {
+			fmt.Printf("%s owes %s : %.2f\n", u.UserName, currentUserName, amountAB)
+		} else if amountBA > 0 {
+			fmt.Printf("%s owes %s : %.2f\n", currentUserName, u.UserName, amountBA)
+		}
+	}
 
-    fmt.Println("------------------------------")
+	fmt.Println("------------------------------")
 }
-
 
 func (s *SplitGroup) ShowAll() {
 
@@ -48,6 +51,8 @@ func (s *SplitGroup) ShowAll() {
 }
 
 func (s *SplitGroup) AddExpense(expense *Expense) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	s.Expenses = append(s.Expenses, expense)
 
@@ -59,13 +64,12 @@ func (s *SplitGroup) AddExpense(expense *Expense) {
 
 		amountPaid := expense.Values[u.Index]
 
-		fmt.Println("index" , u.Index)
+		fmt.Println("index", u.Index)
 
 		fmt.Println(expense.Values)
 
 		A_paid_for_B_payment_mapping_string := fmt.Sprintf("%s-%s", expense.PaidBy, u.UserName)
 		B_paid_for_A_payment_mapping_string := fmt.Sprintf("%s-%s", u.UserName, expense.PaidBy)
-
 
 		// fmt.Println("Amount : ", amountPaid)
 
