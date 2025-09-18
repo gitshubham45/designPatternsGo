@@ -1,7 +1,7 @@
 package pkg
 
 
-type User struct{
+type Player struct{
 	Name string
 	Mark string
 }
